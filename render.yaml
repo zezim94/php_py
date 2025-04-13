@@ -10,4 +10,3 @@ services:
       - key: SENHA_APP
         value: sua_senha_de_app
 
-
