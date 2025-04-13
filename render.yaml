@@ -9,4 +9,3 @@ services:
         value: seu_email@gmail.com
       - key: SENHA_APP
         value: sua_senha_de_app
-

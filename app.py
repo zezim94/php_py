@@ -60,6 +60,52 @@ def index():
         return redirect('/')
 
     return render_template('index.html')
+from flask import jsonify
+
+@app.route('/api/enviar_email', methods=['POST'])
+def api_enviar_email():
+    try:
+        assunto = request.form['assunto']
+        corpo = request.form['mensagem']
+        destinatarios = request.form['destinatarios'].split(',')
+
+        msg = EmailMessage()
+        msg['Subject'] = assunto
+        msg['From'] = EMAIL_REMETENTE
+        msg['To'] = ', '.join(destinatarios)
+        msg.set_content(corpo)
+        msg.add_alternative(f"""\
+        <html>
+          <body>
+            <h3>{assunto}</h3>
+            <p>{corpo}</p>
+          </body>
+        </html>
+        """, subtype='html')
+
+        arquivo = request.files.get('anexo')
+        if arquivo and arquivo.filename != '':
+            filename = secure_filename(arquivo.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            arquivo.save(filepath)
+            with open(filepath, 'rb') as f:
+                msg.add_attachment(f.read(), maintype='application',
+                                   subtype='octet-stream', filename=filename)
+
+        contexto = ssl.create_default_context()
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=contexto) as smtp:
+            smtp.login(EMAIL_REMETENTE, SENHA_APP)
+            smtp.send_message(msg)
+
+        return jsonify({'status': 'sucesso', 'mensagem': 'Email enviado com sucesso!'})
+
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
+    
+
+
