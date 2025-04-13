@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: flask-email-sender
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn app:app
+    envVars:
+      - key: EMAIL_REMETENTE
+        value: seu_email@gmail.com
+      - key: SENHA_APP
+        value: sua_senha_de_app
+
+
